@@ -4,7 +4,8 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import router from './routes';
 import { rateLimit } from 'express-rate-limit'
-
+import swaggerUi from "swagger-ui-express";
+import swaggerOutput from "./swagger_output.json";
 
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
@@ -34,6 +35,8 @@ app.get('/', (req, res) => {
 
 // Use routes
 app.use('/', router);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 
 // Start Express server
 app.listen(port, () => {
