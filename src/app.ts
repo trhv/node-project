@@ -6,7 +6,7 @@ import router from './routes';
 import { rateLimit } from 'express-rate-limit'
 import swaggerUi from "swagger-ui-express";
 import swaggerOutput from "./swagger_output.json";
-
+import logger from './utils/services/logger.service'
 const limiter = rateLimit({
 	windowMs: 15 * 60 * 1000, // 15 minutes
 	limit: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes).
@@ -25,12 +25,14 @@ app.use(limiter)
 // Express configuration
 app.use(cors()); // Enable CORS
 app.use(helmet()); // Enable Helmet
-app.use(morgan('dev')); // Enable Morgan
+// app.use(morgan('dev')); // Enable Morgan
+// Let's have Morgan chat through Winston, for a unified voice
+app.use(morgan('combined', { stream: { write: message => logger.info(message) } }));
 app.use(express.json()); // <=== Enable JSON body parser
 
 // Define Express routes
 app.get('/', (req, res) => {
-  res.send('Hello World!');
+	res.send('Hello World!');
 });
 
 // Use routes
@@ -40,8 +42,8 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 
 // Start Express server
 app.listen(port, () => {
-  // Callback function when server is successfully started
-  console.log(`Server1 started at http://localhost:${port}`);
+	// Callback function when server is successfully started
+	logger.info(`Server1 started at http://localhost:${port}`);
 });
 
 // Export Express app
